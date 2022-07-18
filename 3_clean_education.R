@@ -2,7 +2,7 @@
 ###################################################################
 ##load data - outcomes
 ###################################################################
-folder = "/home/margotw/EA_WB/data/education/" #path to outcome data
+folder = "" #path to outcome data
 file_list <- list.files(path=folder, pattern="*.csv") #files
 
 #read data 
@@ -15,8 +15,8 @@ library(dplyr)
 ###################################################################
 ##clean files
 ###################################################################
-#age at which one left education was measured on 3 occasions
-#take last occassion
+#Age at which one left education was measured on 3 occasions
+#We take the last occassion as this is the most recent info on their EA
 Education = edu.out.csv %>%
   mutate(education = coalesce(X845.2.0,X845.1.0,X845.0.0))
 
@@ -25,13 +25,8 @@ Education = edu.out.csv %>%
 
 Education$education[Education$education <0] <- NA
 
-#what if people indicated a lower age at a later timepoint?? 
-#check with group later
+#Qualifications 
 
-#Qualifications has a lot of variables for time-points again.
-#first we take the last time-point
-#Qualifications = qualifications.out.csv %>%
-#  mutate(quali = coalesce(X6138.2.5,X6138.2.4,X6138.2.3,X6138.2.2##,X6138.2.1,X6138.2.0,X6138.1.5,X6138.1.4,X6138.1.3,X6138.1.2,X6138#.1.1,X6138.1.0,X6138.0.5,X6138.0.4,X6138.0.3,X6138.0.2,X6138.0.1#,X6138.0.0))
 Qualifications = qualifications.out.csv 
 Qualifications[,2:19][Qualifications[,2:19]<0] <- NA
 
@@ -45,7 +40,7 @@ Qualifications = Qualifications %>%
 Qualifications = Qualifications %>%
   mutate(quali0 = pmin(X6138.0.5,X6138.0.4,X6138.0.3,X6138.0.2,X6138.0.1,X6138.0.0, na.rm=T))
 
-#if they indicate a lower education at a later timepoint, I will remove them. 
+#if they indicate a lower education at a later timepoint, I remove them. 
 
 Qualifications$delete[Qualifications$quali1 == 1 & Qualifications$quali0 < Qualifications$quali1] <- 1
 
@@ -67,4 +62,4 @@ Education_final$education[is.na(Education_final$education) & Education_final$qua
 Education_final <- data.frame(Education_final$eid, Education_final$education)
 colnames(Education_final) <- c("eid","education")
 
-write.csv(Education_final,"//home/margotw/EA_WB/data/cleaned_variables/Education.csv", quote=F, row.names=F)
+write.csv(Education_final,"", quote=F, row.names=F)
