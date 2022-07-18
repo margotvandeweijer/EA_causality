@@ -2,7 +2,7 @@
 ###################################################################
 ##load data - outcomes
 ###################################################################
-folder = "/home/margotw/EA_WB/data/covariates/" #path to outcome data
+folder = "" #path to outcome data
 file_list <- list.files(path=folder, pattern="*.csv") #files
 
 #read data 
@@ -11,9 +11,9 @@ for (i in 1:length(file_list)){
   read.csv(paste(folder, file_list[i], sep=''))
 )}
 
-sexarray = read.csv("/home/margotw/EA_WB/data/covariates/sex.BC.array.v2.cov", header=F, sep=" ")
-agepcs = read.csv("/home/margotw/EA_WB/data/covariates/age.25PCs.v2.qcov", header=F, sep=" ")
-ethnic = read.csv("/home/margotw/EA_WB/data/sample_vars/ethnic.out.csv", header=T,sep=",")
+sexarray = read.csv("", header=F, sep=" ")
+agepcs = read.csv("", header=F, sep=" ")
+ethnic = read.csv("", header=T,sep=",")
 library(dplyr)
 
 ###################################################################
@@ -22,7 +22,7 @@ library(dplyr)
 #year of birth is fine already
 
 colnames(yob.out.csv) <- c("eid","yob")
-write.csv(yob.out.csv,"/home/margotw/EA_WB/data/cleaned_variables/yob.csv", quote=F, row.names=F)
+write.csv(yob.out.csv,"yob.csv", quote=F, row.names=F)
 
 #assessment center
 
@@ -35,9 +35,8 @@ library(fastDummies)
 assess <- dummy_cols(assess, select_columns = 'center', remove_first_dummy=T)
 
 
-write.csv(assess,"/home/margotw/EA_WB/data/cleaned_variables/assess.csv", quote=F, row.names=F)
+write.csv(assess,"assess.csv", quote=F, row.names=F)
 
-#we dont have access to the birthorder data unfortunately.
 
 ## Family size
 # biological sisters
@@ -80,11 +79,10 @@ familysize = merge(familysize, Nbro_adopt.out.csv, by="eid")
 #if not adopted, this question was not posed and so the field is NA 
 
 familysize$familysize <- rowSums(familysize[,c(2:5)], na.rm=TRUE)
-#ranges from 0 - 44 which is A BIT much - discuss cutoff here later.
 
 familysize = familysize[,-c(2:5)]
 
-write.csv(familysize,"/home/margotw/EA_WB/data/cleaned_variables/familysize.csv", quote=F, row.names=F)
+write.csv(familysize,"familysize.csv", quote=F, row.names=F)
 
 #season of birth based on month of birth
 mob.out.csv$spring <- 0
@@ -96,11 +94,11 @@ mob.out.csv$summer[mob.out.csv$X52.0.0 == 6 | mob.out.csv$X52.0.0 == 7 | mob.out
 mob.out.csv$autumn[mob.out.csv$X52.0.0 == 9 | mob.out.csv$X52.0.0 == 10 | mob.out.csv$X52.0.0 == 11] <- 1
 mob.out.csv$winter[mob.out.csv$X52.0.0 == 12 | mob.out.csv$X52.0.0 == 1 | mob.out.csv$X52.0.0 == 2] <- 1
 
-#we only need three but i'll throw one out later
+#we only need three because dummies but i'll throw one out later
 
 colnames(mob.out.csv)[2] <- "mob"
 
-write.csv(mob.out.csv,"/home/margotw/EA_WB/data/cleaned_variables/birhtseason.csv", quote=F, row.names=F)
+write.csv(mob.out.csv,"birthseason.csv", quote=F, row.names=F)
 
 #im only going to give the cov and qcov file a header.
 agepcs$V2 <- NULL
@@ -109,26 +107,11 @@ agepcs = agepcs[,-c(12:26)]
 
 colnames(agepcs) <- c("eid","PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10","age")
 
-write.csv(agepcs,"/home/margotw/EA_WB/data/cleaned_variables/agepcs.csv", quote=F, row.names=F)
-
-table(sexarray$V3)  # i think this is sex
-#     0      1
-#247322 208621
-table(sexarray$V4) #this is array
-#     0      1
-# 49377 406566     
-table(sexarray$V5)   #but what is this - asked abdel so wait for answer (maybe it is genetic sex???)
-#     0      1
-#253949 201994
-
-sexarray$V2 <- NULL
-colnames(sexarray) <- c("eid","sex1","batch","sex2")
-
-write.csv(sexarray,"/home/margotw/EA_WB/data/cleaned_variables/sexarray.csv", quote=F, row.names=F)
+write.csv(agepcs,"agepcs.csv", quote=F, row.names=F)
 
 #sample vars
 #birthcountry
-country = read.csv("/home/margotw/EA_WB/data/sample_vars/country.out.csv")
+country = read.csv("")
 
 country[ , 2:4 ][ country[ , 2:4]  == -1 | country[ , 2:4 ] == -3 ] <- NA
 
@@ -137,8 +120,8 @@ country = country %>%
   
 country = country[,-c(2:4)]
 
-write.csv(country,"/home/margotw/EA_WB/data/cleaned_variables/country.csv", quote=F, row.names=F)
+write.csv(country,"country.csv", quote=F, row.names=F)
 
 # genetic ethnic grouping. 
 colnames(ethnic) = c("eid","caucasian")
-write.csv(ethnic,"/home/margotw/EA_WB/data/cleaned_variables/ethnic.csv", quote=F, row.names=F)
+write.csv(ethnic,"ethnic.csv", quote=F, row.names=F)
