@@ -1,5 +1,4 @@
 # Sibling control analysis 
-# Start date: 20/01/2022
 
 # Set up #
 library(tidyverse)
@@ -8,8 +7,6 @@ library(nlme)
 set.seed(42)
 
 #1. Read data ##############
-# Phenotype created by Margot, sent on the 12/01/2022
-# Note from Margot to Perline; this file needs to be updated but I can also just run the analyses from my computer
 pheno <- fread("../../../Data/full_standardized.csv")
 head(pheno)
 
@@ -25,25 +22,24 @@ colnames(adoptees)[1:2]<-c("eid","ID1")
 
 #2. Select sibling subset ###########
 #Remove siblings that are adoptees 
-data_sib <- siblings[!(siblings$eid %in% adoptees$eid),] #41426
+data_sib <- siblings[!(siblings$eid %in% adoptees$eid),]
 
 # Merge with phenotype 
-data_sib <- merge(data_sib, pheno, by= "eid") #33107 
-# CHECK WITH MARGOT IF SAMPLE LOSS IS EXPECTED ######
+data_sib <- merge(data_sib, pheno, by= "eid") 
 
 # There is NAs in the education data
 summary(data_sib$education)
-data_sib <- data_sib[!(is.na(data_sib$education)),] #32712
+data_sib <- data_sib[!(is.na(data_sib$education)),] 
 
 # keep only if at least 2 siblings with same FID 
 number <- as.data.frame(table(data_sib$FID))
 onemember <- number[which(number$Freq == 1),] #identify family with only one member in this data
-data_sib <- data_sib[!(data_sib$FID %in% onemember$Var1), ] #31337
+data_sib <- data_sib[!(data_sib$FID %in% onemember$Var1), ] 
 data_sib <- data_sib[order(data_sib$FID),]
 head(data_sib)
 
 #number of sibships
-length(unique(data_sib$FID)) #15237
+length(unique(data_sib$FID)) 
 
 #3. Identify birth order ######
 summary(data_sib$education)
@@ -67,10 +63,9 @@ data_sib <- data_sib %>%
 
 data_sib <- as.data.frame(data_sib)
 head(data_sib)
-summary(data_sib$multiple) #439 multiple
+summary(data_sib$multiple) 
 
 data_sib[data_sib$multiple==T, ] #check twin have same birth order 
-data_sib[data_sib$FID == 1055432, ] #check twins with birth roder 2 # they do have older sib
 
 
 #get number of twins to investigate potential problems
@@ -116,26 +111,13 @@ ICCest(m0) #0.40
 # linear model for continuous and LPM for binary (so lm for both)
 
 outcomes <- list()
-outcomes$variables_cont <- c("happiness","healthhap",
-                        "friendsat","finansat","famsat","worksat",
-                        "meaning",
-                        "Neuroticism")
-outcomes$variables_bin <- c("depression","anxiety","bipolar","cardiovascular")
+outcomes$variables_cont <- c()
+outcomes$variables_bin <- c()
 outcomes$variables <- c(outcomes$variables_cont, outcomes$variables_bin)
-outcomes$controls <- c("Income18k","Income31k","Income52k","Income100k","height","birthweight","height10","weight10")  #controls
+outcomes$controls <- c()  #controls
 
-summary(data_sib[outcomes$variables_cont])
-summary(data_sib[outcomes$variables_bin])
-summary(data_sib[outcomes$controls])
-  
 vars <- list()
-vars$covariates <- c("sex1","yob","familysize", "birth_order",
-                     "summer","autumn","winter",
-                     "center_11001","center_11002","center_11003","center_11004", "center_11005",
-                     "center_11006","center_11007","center_11008","center_11009",
-                     "center_11010","center_11011","center_11012","center_11013",
-                     "center_11014","center_11016","center_11017","center_11018",
-                     "center_11020","center_11021","center_11022","center_11023") #leave out center10003 and spring from covariates
+vars$covariates <- c() #covariates
 
 summary(data_sib[vars$covariates])
 
@@ -160,18 +142,18 @@ for (i in outcomes$controls){
   full_results <- rbind(full_results, results)
 }
 full_results <- full_results[colnames(full_results)[c(6,5,1:4)]]
-#write.table(full_results, file="wellbeingEA__siblings_full_results_variables_20220311.csv", 
+#write.table(full_results, file="", 
 #           sep = ",", quote = FALSE, row.names = F)
-write.table(full_results, file="wellbeingEA__siblings_full_results_controls_20220311.csv", 
+write.table(full_results, file="", 
            sep = ",", quote = FALSE, row.names = F)
 
 # only education results 
 educ_result <- full_results[full_results$estimates == "education_dev" |
                               full_results$estimates == "education_mean",]
 educ_result
-#write.table(educ_result, file="wellbeingEA__siblings_educ_results_variables_20220311.csv", 
+#write.table(educ_result, file="", 
 #            sep = ",", quote = FALSE, row.names = F)
-write.table(educ_results, file="wellbeingEA__siblings_educ_results_controls_20220311.csv", 
+write.table(educ_results, file="", 
            sep = ",", quote = FALSE, row.names = F)
 
 
@@ -184,10 +166,6 @@ for (i in outcomes$variables){
 }
 colnames(table_sample) <- c("Outcome", " Effective sample size")
 table_sample
-#write.table(table_sample, file="wellbeingEA__siblings_table_sample_variables_20220311.csv", 
-#          sep = ",", quote = FALSE, row.names = F)
-#write.table(table_sample, file="wellbeingEA__siblings_table_sample_controls_20220311.csv", 
-#           sep = ",", quote = FALSE, row.names = F)
 
 # Plot results 
 educ_results <- educ_result %>% 
@@ -206,7 +184,7 @@ ggplot(educ_results, aes(x=outcome, y=value, fill=estimates))+
 
 
 
-results <- fread("wellbeingEA__siblings_full_results_variables_20220201.csv")
+results <- fread("")
 results <- results %>% 
   rename(
     value = Estimate, 
@@ -274,30 +252,6 @@ for (i in outcomes$controls){
                   paste(covariates)), data=data_sib_exc))
 } 
 
-# sample size variable 
-# 1] 12599
-# [1] 12640
-# [1] 8367
-# [1] 8471
-# [1] 8485
-# [1] 4123
-# [1] 4381
-# [1] 21205
-# [1] 31337
-# [1] 31337
-# [1] 31337
-# [1] 31337
-
-#sample size control 
-# [1] 24361
-# [1] 24361
-# [1] 24361
-# [1] 24361
-# [1] 31226
-# [1] 9606
-# [1] 29718
-# [1] 29643
-
 #Create table with all results
 full_results_sens <- NULL
 for (i in outcomes$controls){ 
@@ -309,19 +263,14 @@ for (i in outcomes$controls){
   full_results_sens <- rbind(full_results_sens, results)
 }
 full_results_sens <- full_results_sens[colnames(full_results_sens)[c(6,5,1:4)]]
-# write.table(full_results, file="wellbeingEA__siblings_full_results_variables_sensibility_20220315.csv", 
+# write.table(full_results, file="", 
 #                        sep = ",", quote = FALSE, row.names = F)
-# write.table(full_results, file="wellbeingEA__siblings_full_results_controls_sensibility_20220315.csv", 
+# write.table(full_results, file="", 
 #             sep = ",", quote = FALSE, row.names = F)
 
 educ_result <- full_results_sens[full_results_sens$estimates == "education_dev" |
                               full_results_sens$estimates == "education_mean",]
 educ_result
-
-# write.table(educ_result, file="wellbeingEA__siblings_educ_results_variables_sensibility_20220315.csv", 
-#             sep = ",", quote = FALSE, row.names = F)
-# write.table(educ_result, file="wellbeingEA__siblings_educ_results_controls_sensibility_20220315.csv", 
-#             sep = ",", quote = FALSE, row.names = F)
 
 # Plot results 
 educ_results <- educ_result %>% 
