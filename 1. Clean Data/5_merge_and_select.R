@@ -1,6 +1,6 @@
 #merge datasets. 
 library(dplyr)
-folder = "/home/margotw/EA_WB/data/cleaned_variables/" 
+folder = "" 
 file_list <- list.files(path=folder) #files
 
 #read data 
@@ -9,20 +9,17 @@ for (i in 1:length(file_list)){
   read.csv(paste(folder, file_list[i], sep=''))
 )}
 
-
-#complete file with all variables
+################################################################
+#Complete file with all variables
 #can make subselections later if neccessary
 
 full = Reduce(function(x,y) merge(x = x, y = y, by = "eid", all.x=T, all.y=T), list(agepcs.csv,Anxiety.csv,assess.csv,Bipolar.csv,birhtseason.csv,BW.csv,Cardiovascular.csv, country.csv, Depression.csv,Education.csv, ethnic.csv, fam_sat.csv,familysize.csv,finan_sat.csv,friend_sat.csv,HAP.csv,HAPhealth.csv,Height.csv,Height10.csv,income.csv,meaning.csv,Neuroticism.csv,sexarray.csv,Weight10.csv,work_sat.csv,yob.csv))
 
 
-#can remove 1 season since we dont need all as dummies
-#i will remove spring because its the most boring 
-
+#We remove 1 birth season since we dont need all as dummies
 full$spring <- NULL
 
 #only include individuals born in England or Wales
-
 full = subset(full, country == 1 | country == 2)
 
 #exclude individuals that are not of european ancestry. 
@@ -35,7 +32,7 @@ full$anxiety[is.na(full$anxiety)] <- 0
 full$cardiovascular[is.na(full$cardiovascular)] <- 0
 
 #exclude one individual from each genetically related pair 
-#do this in an interactive node or it will crash
+
 genrel = read.csv("/home/margotw/EA_WB/data/sample_vars/relatedness_file.txt", header=T, sep=" ")
 
 participants = subset(full, !is.na(education))
@@ -43,10 +40,6 @@ participants = participants[,1]
 library(ukbtools)
 
 remove = ukb_gen_samples_to_remove(genrel, participants, cutoff = 0.0884) #0.0884 includes pairs with greater than 3rd-degree relatedness
-
-load("Remove.RData") # i ran all the above using a script and saved the Rdata
-
-#gives 26214 eids to remove
 
 temp = as.data.frame(remove)
 colnames(temp) = "eid"
@@ -74,7 +67,7 @@ full2$caucasian <- NULL
 
 #we need to make adjust the age  variable for meaning, happiness and happiness with own health are these are (partly) based on the online followup 
 #add date of recruitment for the online followup
-date_recruit = read.csv("/home/margotw/EA_WB/data/covariates/followup.out.csv")
+date_recruit = read.csv("")
 colnames(date_recruit)[2] = "date_recruit"
 full2 = merge(full2, date_recruit, by="eid")
 
@@ -123,24 +116,18 @@ full2$day <- NULL
 full2$DOB <- NULL
 
 
-#im going to make an extra edu variable that only has people age <19 when they left
-full2$edu_19 = full2$education
-full2$edu_19[full2$edu_19 > 18] <- NA
+write.csv(full2,"full_unstandardized.csv", quote=F, row.names=F)
 
-write.csv(full2,"/home/margotw/EA_WB/data/full_data/full_unstandardized.csv", quote=F, row.names=F)
-
-#standardized outcome
-#i do not standardize binary outcomes or categorical (height10 or weight10), make note in table!
-
+#standardized continuous outcomes
 
 full2_stand <- full2 %>% mutate_at(c("happiness","healthhap","friendsat","finansat","famsat","worksat","meaning","Neuroticism",
                                      "height","birthweight"), ~(scale(.) %>% as.vector))
 
-write.csv(full2_stand,"/home/margotw/EA_WB/data/full_data/full_standardized.csv", quote=F, row.names=F)
+write.csv(full2_stand,"full_standardized.csv", quote=F, row.names=F)
 
-#lets continue with the standardized file
+#Standardized file without genetic relatnedness
 full2_stand = subset(full2_stand, is.na(remove_related))
 
 full2_stand$remove_related <- NULL
 
-write.csv(full2_stand,"/home/margotw/EA_WB/data/full_data/complete.csv", quote=F, row.names=F)
+write.csv(full2_stand,"complete.csv", quote=F, row.names=F)
