@@ -3,7 +3,7 @@
 ###################################################################
 ##load data - outcomes
 ###################################################################
-folder = "/home/margotw/EA_WB/data/controls/" #path to outcome data
+folder = "" #path to outcome data
 file_list <- list.files(path=folder, pattern="*.csv") #files
 
 #read data 
@@ -30,32 +30,29 @@ table(BW$Nmeas)
 #    2     3
 #10859  1160
 
-#lets say if the difference between any 2 measures > 0.5, we remove
-#(so also if twice the same value and once a different one)
+#If the difference between any 2 measures > 0.5, we remove
 BW$diff1 <- BW$X20022.0.0 - BW$X20022.1.0
 BW$diff2 <- BW$X20022.0.0 - BW$X20022.2.0
 BW$diff3 <- BW$X20022.1.0 - BW$X20022.2.0
 
 BW$problematic[BW$diff1 > 0.5 | BW$diff1 < -0.5 | BW$diff2 > 0.5 | BW$diff2 < -0.5 | BW$diff3 > 0.5 | BW$diff3 < -0.5  ] <- 1
 
-#removes 635 people with problematic values 
+
 #additionally we also want to remove people that have BW <2.5 or >4.5
 #BW$problematic2[BW$X20022.0.0 < 2.5 | BW$X20022.0.0 > 4.5 | BW$X20022#.1.0 < 2.5 | BW$X20022.1.0 > 4.5 | BW$X20022.0.0 < 2.5 | BW$X20022.0.0 > 4.5] <- 1   #42774
 
-
 BW <- transform(BW, birthweight = rowMeans(BW[,2:4], na.rm = TRUE))
 
- 
 BW$birthweight[BW$problematic == 1] <- NA
 
-toolow = subset(BW, birthweight < 2.50)  #28412
-toohigh  = subset(BW, birthweight > 4.50)   #14131
+toolow = subset(BW, birthweight < 2.50)  
+toohigh  = subset(BW, birthweight > 4.50)  
 
 BW$birthweight[BW$birthweight < 2.50 | BW$birthweight > 4.50] <- NA
 
 BW <- BW[, -c(2:9)]
 
-write.csv(BW,"/home/margotw/EA_WB/data/cleaned_variables/BW.csv", quote=F, row.names=F)
+write.csv(BW,"", quote=F, row.names=F)
 
 ## Height
 Height = height.out.csv
@@ -81,8 +78,8 @@ Height <- transform(Height, height = rowMeans(Height[,2:4], na.rm = TRUE))
 
 Height = Height[,-c(2:9)]
 
-#computing the Zscores for males and females separately requires us to merge the file with sex.
-sexarray = read.csv("/home/margotw/EA_WB/data/covariates/sex.BC.array.v2.cov", header=F, sep=" ")
+#computing the Zscores for males and females separately requires us to merge the file with that contains sex.
+sexarray = read.csv("", header=F, sep=" ")
 sexarray = sexarray[,-c(4:5)]
 sexarray$V2 <- NULL
 colnames(sexarray) = c("eid","sex")
@@ -99,20 +96,20 @@ women$Zheight <- NULL
 
 Height = rbind(women, men)
 
-write.csv(Height,"/home/margotw/EA_WB/data/cleaned_variables/Height.csv", quote=F, row.names=F)
+write.csv(Height,"Height.csv", quote=F, row.names=F)
 
 #Height at age 10
-#categorical question
 Height10 = height10.out.csv
 Height10[ , 2:4 ][ Height10[ , 2:4 ] == -1 ] <- NA
 Height10[ , 2:4 ][ Height10[ , 2:4 ] == -3 ] <- NA
 
+#Are the answers for different time points different, if so: remove.
 Height10$diff1 <- Height10$X1697.0.0 - Height10$X1697.1.0
 Height10$diff2 <- Height10$X1697.0.0 - Height10$X1697.2.0
 Height10$diff3 <- Height10$X1697.1.0 - Height10$X1697.2.0
 
 Height10$remove[Height10$diff1 > .01 | Height10$diff1 < -.01 | Height10$diff2 > .01 | Height10$diff2 < -.01 | 
-Height10$diff3 > .01 | Height10$diff3 < -.01] <- 1   #4950
+Height10$diff3 > .01 | Height10$diff3 < -.01] <- 1  
 
 Height10 = Height10 %>%
   mutate(height10 = coalesce(X1697.0.0, X1697.1.0, X1697.2.0))
@@ -125,7 +122,7 @@ temp = Height10
 Height10$height10[temp$height10 == 2] <- 3
 Height10$height10[temp$height10 == 3] <- 2
 
-write.csv(Height10,"/home/margotw/EA_WB/data/cleaned_variables/Height10.csv", quote=F, row.names=F)
+write.csv(Height10,"", quote=F, row.names=F)
 
 #body size at age 10 
 Weight10 = weight10.out.csv
@@ -151,7 +148,7 @@ temp = Weight10
 Weight10$weight10[temp$weight10 == 2] <- 3
 Weight10$weight10[temp$weight10 == 3] <- 2
 
-write.csv(Weight10,"/home/margotw/EA_WB/data/cleaned_variables/Weight10.csv", quote=F, row.names=F)
+write.csv(Weight10,"", quote=F, row.names=F)
 
 #income
 income = income.out.csv
@@ -178,6 +175,6 @@ income$Income18k[income$Income < 2] <- 0
 income$Income31k[income$Income < 3 ] <- 0
 income$Income52k[income$Income < 4 ] <- 0
 income$Income100k[income$Income < 5 ] <- 0
-write.csv(income,"/home/margotw/EA_WB/data/cleaned_variables/income.csv", quote=F, row.names=F)
+write.csv(income,"", quote=F, row.names=F)
 
 
