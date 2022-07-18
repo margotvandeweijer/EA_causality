@@ -1,14 +1,11 @@
-#clean data for analyses
 
-#module load 2021
-#module load R/4.1.0-foss-2021a
-# R
+# script is specific to UKB data
 
 ########################################################################
 ##load data - outcomes
 ########################################################################
 
-folder = "/home/margotw/EA_WB/data/outcomes/" #path to outcome data
+folder = "" #path to outcome data
 file_list <- list.files(path=folder, pattern="*.csv") #files
 
 #read data 
@@ -21,7 +18,7 @@ for (i in 1:length(file_list)){
 ##  Well-Being
 ########################################################################
 ## rename
-#dont like these names
+
 fam_sat = famrel.out.csv  #3 occasions
 finan_sat = finsit.out.csv #3 occasions
 friend_sat = friendsat.out.csv #3 occasions
@@ -36,8 +33,7 @@ meaning = meaning.out.csv # 1 occasion
 #select time-points
 ############################
 #data are available for 3 timepoints for each of these variables
-#we take the first one available (deviation from pre-reg)
-#not the most efficient way, but it works
+#we take the first one available 
 
 library(dplyr)
 
@@ -53,7 +49,6 @@ assign(outputname,dataframe, envir=.GlobalEnv)
 }
 
 # make new column with last timepoint
-#check with head,tail each time if all goes well 
 addcol(fam_sat,"famsat", "fam_sat")
 addcol(finan_sat,"finansat", "finan_sat")
 addcol(friend_sat,"friendsat", "friend_sat")
@@ -153,17 +148,7 @@ HAPhealth <- HAPhealth %>% mutate(healthhap =
                                
 HAPhealth <- HAPhealth[, -c(2:3)]  
 
-############################
-#save files to temporary location
-############################
-                            
-write.csv(fam_sat,"/home/margotw/EA_WB/data/cleaned_variables/fam_sat.csv", quote=F, row.names=F)
-write.csv(finan_sat,"/home/margotw/EA_WB/data/cleaned_variables/finan_sat.csv", quote=F, row.names=F)
-write.csv(friend_sat,"/home/margotw/EA_WB/data/cleaned_variables/friend_sat.csv", quote=F, row.names=F)
-write.csv(HAPhealth,"/home/margotw/EA_WB/data/cleaned_variables/HAPhealth.csv", quote=F, row.names=F)
-write.csv(work_sat,"/home/margotw/EA_WB/data/cleaned_variables/work_sat.csv", quote=F, row.names=F)
-write.csv(HAP,"/home/margotw/EA_WB/data/cleaned_variables/HAP.csv", quote=F, row.names=F)
-write.csv(meaning,"/home/margotw/EA_WB/data/cleaned_variables/meaning.csv", quote=F, row.names=F)
+#save output files whereever
 
 ##################################################################
 ##  Mental Health
@@ -224,7 +209,7 @@ Anxiety = merge(Anxiety, ICDsecond_anx, by="eid", all.x=T, all.y=T)
 
 Anxiety$anxiety <- 1
 
-write.csv(Anxiety,"/home/margotw/EA_WB/data/cleaned_variables/Anxiety.csv", quote=F, row.names=F)
+write.csv(Anxiety,"location", quote=F, row.names=F)
 
 ##Manic or Bipolar disorder (F30 F31)
 ICDmain_bp = ICD10main.out.csv %>% filter_all(any_vars(. %in% c('F300','F301','F302','F302','F308','F309','F310','F311','F312','F313','F314','F315','F316','F317','F318','F319')))
@@ -250,13 +235,13 @@ Bipolar = merge(Bipolar, ICDsecond_bp, by="eid", all.x=T, all.y=T)
 
 Bipolar$bipolar <- 1
 
-write.csv(Bipolar,"/home/margotw/EA_WB/data/cleaned_variables/Bipolar.csv", quote=F, row.names=F)
+write.csv(Bipolar,"location", quote=F, row.names=F)
 
 ##################################################################
 ## Physical health  (cardiovascular)
 ##################################################################
-#the cardio file contains 12 instances, some of which only have 1 observation, which is very annoying
-#found useful function below
+#the cardio file contains 12 instances, some of which only have 1 observation
+
 cardio = cardio.out.csv %>%
   mutate(CV_problems = coalesce(X6150.0.0, X6150.0.1, X6150.0.2, X6150.0.3,X6150.1.0,X6150.1.1,X6150.1.2,X6150.1.3,X6150.2.0,X6150.2.1,X6150.2.2,X6150.2.3))  
   
@@ -264,10 +249,8 @@ cardio = cardio.out.csv %>%
 cardio = data.frame(cardio$eid, cardio$CV_problems)
 colnames(cardio) <- c("eid","CV_problems")
 
-#we didnt pre-register anything ICD10 here - check with group later
 
 #self-report
-# we didnt put hypertension here but i guess that was a mistake?
 Cardio_SR = illness.out.csv %>% filter_all(any_vars(. %in% c('1065','1066','1067','1068','1493','1081','1082','1083','1425')))
 
 Cardio_SR$Cardio_SR = 1
@@ -279,12 +262,12 @@ Cardio <- merge(cardio, Cardio_SR, by="eid", all.x=T, all.y=T)
 #final variable to use
 Cardio$cardiovascular[Cardio$CV_problems > 0 | Cardio$Cardio_SR == 1] <- 1
 
-write.csv(Cardio,"/home/margotw/EA_WB/data/cleaned_variables/Cardiovascular.csv", quote=F, row.names=F)
+write.csv(Cardio,"location", quote=F, row.names=F)
 ##################################################################
 ## Sumscores (Neuroticism)
 ##################################################################
- #this file is already cleaned actually
+ #this data is cleaned in UKB already
 Neuroticism = Neu.out.csv
 colnames(Neuroticism)[2] <- "Neuroticism"
 
-write.csv(Neuroticism,"/home/margotw/EA_WB/data/cleaned_variables/Neuroticism.csv", quote=F, row.names=F)
+write.csv(Neuroticism,"location", quote=F, row.names=F)
