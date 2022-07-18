@@ -4,7 +4,7 @@ rm(list=ls())
 library(fixest)
 
 # load dataset for ROSLA analyses
-setwd("/home/margotw/EA_WB/data/full_data/")
+setwd("")
 rosla <- read.csv("rosla.csv", header=T)
 
 #make binary education indicator 
@@ -14,15 +14,13 @@ rosla$edu[rosla$education > 15] <- 1
 # covariates to include in the analyses
 #there is a standard list that will be included and a list that we need to examine (with varying age variables depending on the outcome)
 vars <- list()
-vars$covariates1 <- c("sex1","familysize","center_11001","center_11002","center_11003","center_11004","center_11005","center_11006",
-                      "center_11007","center_11008","center_11009","center_11010","center_11011","center_11012","center_11013","center_11014",
-                      "center_11016","center_11017", "center_11018","center_11020","center_11021","center_11022","center_11023") # list all covariates
+vars$covariates1 <- c() # list all covariates
 covariates1 = paste(vars$covariates1, collapse = " + ")
 
 # outcome variables
 outcomes <- list()
-outcomes$variables <- c("happiness","healthhap","friendsat","finansat","famsat","worksat","meaning","Neuroticism","depression","anxiety","bipolar","cardiovascular") #outcomes
-outcomes$controls <- c("Income18k","Income31k","Income52k","Income100k","height","birthweight","height10","weight10")  #controls
+outcomes$variables <- c() #outcomes
+outcomes$controls <- c()  #controls
 
 #function to perform the analyses
 analyse_rosla <- function(varname){ 
@@ -33,7 +31,7 @@ output <- feols(f, data = rosla )
 assign(varname,output, envir=.GlobalEnv)
 } 
 
-#run without only these covariates
+#run without only standard covariates
 
 main_outcomes <- lapply(outcomes$variables, analyse_rosla)
 control_outcomes  <- lapply(outcomes$controls, analyse_rosla)
@@ -61,7 +59,7 @@ output <- feols(f, data = rosla )
 assign(varname,output, envir=.GlobalEnv)
 } 
 
-outcomes$variables1 <- c("friendsat","finansat","famsat","worksat","Neuroticism","depression","anxiety","bipolar","cardiovascular") 
+outcomes$variables1 <- c() 
 
 main_outcomes3 <- lapply(outcomes$variables1, analyse_rosla3)
 control_outcomes3  <- lapply(outcomes$controls, analyse_rosla3)
@@ -77,8 +75,6 @@ happiness = feols(happiness ~ sex1 + familysize + center_11001 + center_11002 + 
 #happiness with own health
 haphealth = feols(healthhap ~ sex1 + familysize + center_11001 + center_11002 + center_11003 + center_11004 + center_11005 + center_11006 + center_11007 + center_11008 + center_11009 + center_11010 + center_11011 + center_11012 + center_11013 + center_11014 + center_11016 + center_11017 + center_11018 + center_11020 + center_11021 + center_11022 + center_11023 + 
  summer + autumn + winter + age_haphealth | edu ~ reform, data=rosla)
-#i'll also run regular regression predicting the vars with education to compare
-#function to perform the analyses
 
 
 #add year of birth (continuous)
@@ -130,7 +126,6 @@ happiness5 = feols(happiness ~ sex1 + familysize + center_11001 + center_11002 +
 #happiness with own health
 haphealth5 = feols(healthhap ~ sex1 + familysize + center_11001 + center_11002 + center_11003 + center_11004 + center_11005 + center_11006 + center_11007 + center_11008 + center_11009 + center_11010 + center_11011 + center_11012 + center_11013 + center_11014 + center_11016 + center_11017 + center_11018 + center_11020 + center_11021 + center_11022 + center_11023 + 
  summer + autumn + winter + age_haphealth + I(as.factor(yob))| edu ~ reform, data=rosla)
-
 
 
 #year of birth and season, but not age (continuous)
@@ -188,23 +183,4 @@ for (i in outcomes$variables){
   print(i[[1]])
   print(summary(model)) 
 } 
-
-lm(happiness ~ education, data =rosla)
-
-#meaning_ols = lm(meaning ~ education + sex1 + familysize + center_11001 + center_11002 + center_11003 + center_11004 + center_11005 + center_11006 + center_11007 + center_11008 + center_11009 + center_11010 + center_11011 + center_11012 + center_11013 + center_11014 + center_11016 + center_11017 + center_11018 + center_11020 + center_11021 + center_11022 + center_11023 + 
-#                   summer + autumn + winter + age_meaning + yob, data=rosla)
-
-#happiness_ols = lm(happiness ~ sex1 + familysize + center_11001 + center_11002 + center_11003 + center_11004 + center_11005 + center_11006 + center_11007 + center_11008 + center_11009 + center_11010 + center_11011 + center_11012 + center_11013 + center_11014 + center_11016 + center_11017 + center_11018 + center_11020 + center_11021 + center_11022 + center_11023 + 
-#                     summer + autumn + winter + age_happiness + yob + education, data=rosla)
-
-
-#haphealth_ols = lm(healthhap ~ sex1 + familysize + center_11001 + center_11002 + center_11003 + center_11004 + center_11005 + center_11006 + center_11007 + center_11008 + center_11009 + center_11010 + center_11011 + center_11012 + center_11013 + center_11014 + center_11016 + center_11017 + center_11018 + center_11020 + center_11021 + center_11022 + center_11023 + 
-#                     summer + autumn + winter + age_haphealth + yob + education, data=rosla)
-
-
-
-
-
-
-
 
